@@ -1,0 +1,60 @@
+java:
+    source_url: http://10.101.56.66/install_cache/jdk-7u45-linux-x64.tar.gz
+    version_name: jdk1.7.0_45
+
+# currently supported values: ['apache-1.2.1', 'apache-2.2.0', 'hdp-1.3.0', 'hdp-2.2.0', 'cdh-4.5.0', 'cdh-4.5.0-mr1']
+hadoop:
+  version: hdp-2.2.0
+  source_url: http://10.101.56.66/install_cache/hadoop-2.2.0.2.0.6.0-76.tar.gz
+
+zookeeper:
+  version: 3.4.5
+  source_url: http://10.101.56.66/install_cache/zookeeper-3.4.5.tar.gz
+
+accumulo:
+    version: 1.5.0sqrrl4
+    source_url: http://10.101.56.66/install_cache/accumulo-1.5.0sqrrl4-bin.tar.gz
+    config:
+        log_root: /var/log/accumulo
+        log_level: INFO # ['DEBUG', 'INFO', 'WARN', 'ERROR']
+        memory_profile: 512MB # ['512MB', '1GB', '2GB', '3GB']
+        accumulo-site:
+            trace.user:
+                value: root
+            crypto.module.class:
+                value: org.apache.accumulo.core.security.crypto.DefaultCryptoModule
+            crypto.cipher.suite:
+                value: AES/CFB/NoPadding
+            crypto.cipher.algorithm.name:
+                value: AES
+            crypto.cipher.key.length:
+                value: 128
+            crypto.secure.rng:
+                value: SHA1PRNG
+            crypto.secure.rng.provider:
+                value: SUN
+            crypto.secret.key.encryption.strategy.class:
+                value: org.apache.accumulo.core.security.crypto.CachingHDFSSecretKeyEncryptionStrategy
+            crypto.default.key.strategy.cipher.suite:
+                value: AES/ECB/NoPadding
+            instance.security.authenticator:
+                value: com.sqrrl.analytics.extensions.accumulo.security.ShiroAndZookeeperAuthenticator
+            instance.security.authorizor:
+                value: com.sqrrl.analytics.extensions.accumulo.security.ShiroAndZookeeperAuthorizor
+            instance.security.permissionHandler:
+                value: com.sqrrl.analytics.extensions.accumulo.security.ShiroAndZookeeperPermissionHandler
+sqrrl:
+    version: 1.3.1
+    version_name: sqrrl-enterprise-1.3.1
+    source_url: http://10.101.56.66/install_cache/sqrrl-enterprise-1.3.1.tar.gz
+    config:
+        shiro-ini:
+            main:
+                sha256Matcher: org.apache.shiro.authc.credential.Sha256CredentialsMatcher
+                iniRealm.authenticationCachingEnabled: true
+                builtInCacheManager: org.apache.shiro.cache.MemoryConstrainedCacheManager
+                securityManager.cacheManager: '$builtInCacheManager'
+                securityManager.subjectDAO.sessionStorageEvaluator.sessionStorageEnabled: false
+            users:
+                test: 'test, wiki, twitter, divByTwo, divByThree'
+
