@@ -84,6 +84,13 @@ do
       grep $mountpoint /etc/mtab >> /etc/fstab
     fi
     
+    # erase pre-existing data
+    for d in hdfs yarn mapred
+    do
+      ddir="${mountpoint}/${d}"
+      [ -d $ddir ] && rm -rvf $ddir
+    done
+
   else
     echo "... not found"
   fi
