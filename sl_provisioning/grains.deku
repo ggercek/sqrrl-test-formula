@@ -44,9 +44,9 @@ accumulo:
             instance.security.permissionHandler:
                 value: com.sqrrl.analytics.extensions.accumulo.security.ShiroAndZookeeperPermissionHandler
 sqrrl:
-    version: 1.3.1
-    version_name: sqrrl-enterprise-1.3.1
-    source_url: http://10.101.56.66/install_cache/sqrrl-enterprise-1.3.1.tar.gz
+    version: 1.3.2-RC2
+    version_name: sqrrl-enterprise-1.3.2-RC2
+    source_url: http://10.101.56.66/install_cache/sqrrl-enterprise-1.3.2-RC2.tar.gz
     config:
         shiro-ini:
             main:
