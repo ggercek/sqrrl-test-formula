@@ -1,0 +1,119 @@
+yum -y install http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+yum -y install salt-minion --enablerepo=epel-testing
+
+cat << EOM > /etc/salt/grains
+hdfs_data_disks:
+  - /data1
+  - /data2
+  - /data3
+  - /data4
+  - /data5
+  - /data6
+  - /data7
+  - /data8
+
+mapred_data_disks:
+  - /data1
+  - /data2
+  - /data3
+  - /data4
+  - /data5
+  - /data6
+  - /data7
+  - /data8
+
+yarn_data_disks:
+  - /data1
+  - /data2
+  - /data3
+  - /data4
+  - /data5
+  - /data6
+  - /data7
+  - /data8
+
+roles:
+  - hadoop_slave
+  - accumulo_slave
+
+EOM
+
+curl http://10.101.56.66/grains.deku >> /etc/salt/grains
+
+cat << EOM > /etc/salt/minion
+# startup-provisioned
+master: 10.101.56.66
+
+mine_functions:
+  network.interfaces: []
+  test.ping: []
+  grains.items: []
+  network.ip_addrs:
+    - bond0
+
+mine_interval: 2
+
+EOM
+
+service salt-minion restart
+chkconfig salt-minion on
+
+i=1
+
+for n in b c d e f g h i j k l m
+do
+  dev="/dev/sd${n}"
+  partition="${dev}1"
+  label="data${i}"
+  mountpoint="/${label}"
+  echo -n "Looking for $dev "
+
+  if [ -b $dev ]
+  then
+    echo "... found"
+    if [ ! -b $partition ]
+    then
+      echo "Partitioning $dev"
+      parted /dev/sd${n} --script -- mklabel data1
+      parted /dev/sd${n} --script -- mkpart primary 0 -1
+      echo "Formatting $partition"
+      mkfs.ext2 $partition
+    else
+      echo "Partition ${partition} already exists"
+    fi
+    e2label $partition $label
+    [ ! -d $mountpoint ] && mkdir $mountpoint
+
+    if [ $(grep -c $mountpoint /etc/mtab) -eq 0 ]
+    then
+      mount LABEL=$label -o noatime $mountpoint
+    fi
+
+    if [ $(grep -c $mountpoint /etc/mtab) -ne 0 ]
+    then
+      echo "$partition is mounted on $mountpoint"
+    else
+      echo "$partition is not mounted"
+    fi
+
+    if [ $(grep -c $mountpoint /etc/fstab) -eq 0 ]
+    then
+      echo "Adding $partition to /etc/fstab"
+      grep $mountpoint /etc/mtab >> /etc/fstab
+    fi
+
+    # erase pre-existing data
+    for d in hdfs yarn mapred
+    do
+      ddir="${mountpoint}/${d}"
+      [ -d $ddir ] && rm -rvf $ddir
+    done
+    
+  else
+    echo "... not found"
+  fi
+
+let i=${i}+1
+
+done
+
