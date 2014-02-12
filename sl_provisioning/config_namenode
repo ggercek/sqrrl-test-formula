@@ -5,36 +5,20 @@ cat << EOM > /etc/salt/grains
 hdfs_data_disks:
   - /data1
   - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
 
 mapred_data_disks:
   - /data1
   - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
 
 yarn_data_disks:
   - /data1
   - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
 
 roles:
-  - hadoop_slave
-  - accumulo_slave
+  - hadoop_master
+  - accumulo_master
+  - accumulo_proxy
+  - development
   - monitor
 
 EOM
@@ -102,14 +86,14 @@ do
       echo "Adding $partition to /etc/fstab"
       grep $mountpoint /etc/mtab >> /etc/fstab
     fi
-
+    
     # erase pre-existing data
     for d in hdfs yarn mapred
     do
       ddir="${mountpoint}/${d}"
       [ -d $ddir ] && rm -rvf $ddir
     done
-    
+
   else
     echo "... not found"
   fi
