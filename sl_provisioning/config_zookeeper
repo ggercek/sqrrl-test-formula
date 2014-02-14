@@ -41,8 +41,8 @@ then
   if [ ! -b $partition ]
   then
     echo "Partitioning $dev"
-    parted /dev/sd${n} --script -- mklabel data1
-    parted /dev/sd${n} --script -- mkpart primary 0 -1
+    parted ${dev} --script -- mklabel data1
+    parted ${dev} --script -- mkpart primary 0 -1
   else
     echo "Partition ${partition} already exists"
   fi
