@@ -3,34 +3,34 @@ yum -y install salt-minion --enablerepo=epel-testing
 
 cat << EOM > /etc/salt/grains
 hdfs_data_disks:
-  - /data1
-  - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
+  - /disk2
+  - /disk3
+  - /disk4
+  - /disk5
+  - /disk6
+  - /disk7
+  - /disk8
+  - /disk9
 
 mapred_data_disks:
-  - /data1
-  - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
+  - /disk2
+  - /disk3
+  - /disk4
+  - /disk5
+  - /disk6
+  - /disk7
+  - /disk8
+  - /disk9
 
 yarn_data_disks:
-  - /data1
-  - /data2
-  - /data3
-  - /data4
-  - /data5
-  - /data6
-  - /data7
-  - /data8
+  - /disk2
+  - /disk3
+  - /disk4
+  - /disk5
+  - /disk6
+  - /disk7
+  - /disk8
+  - /disk9
 
 roles:
   - hadoop_slave
@@ -59,109 +59,9 @@ EOM
 service salt-minion restart
 chkconfig salt-minion on
 
-# add /applogs partition on /dev/sdb
-
-dev="/dev/sdb"
-partition="${dev}1"
-label="applogs"
-mountpoint="/${label}"
-echo -n "Looking for $dev "
-
-if [ -b $dev ]
-then
-  echo "... found"
-  if [ ! -b $partition ]
-  then
-    echo "Partitioning $dev"
-    parted ${dev} --script -- mklabel data1
-    parted ${dev} --script -- mkpart primary 0 -1
-  else
-    echo "Partition ${partition} already exists"
-  fi
-
-  echo "Formatting partition $partition"
-  mkfs.ext3 $partition
-
-  echo "Labeling partition $partition as $label"
-  e2label $partition $label
-
-  echo "Mounting partition $partition to $mountpoint"
-  [ ! -d $mountpoint ] && mkdir $mountpoint
-
-  if [ $(grep -c $mountpoint /etc/mtab) -eq 0 ]
-  then
-    mount LABEL=$label -o noatime $mountpoint
-  fi
-
-  if [ $(grep -c $mountpoint /etc/mtab) -ne 0 ]
-  then
-    echo "$partition is mounted on $mountpoint"
-  else
-    echo "$partition is not mounted"
-  fi
-
-  if [ $(grep -c $mountpoint /etc/fstab) -eq 0 ]
-  then
-    echo "Adding $partition to /etc/fstab"
-    grep $mountpoint /etc/mtab >> /etc/fstab
-  fi
-else
-  echo "... not found"
-fi
-
-
-i=1
-
-for n in c d e f g h i j k l m
-do
-    dev="/dev/sd${n}"
-    partition="${dev}1"
-    label="data${i}"
-    mountpoint="/${label}"
-    echo -n "Looking for $dev "
-
-    if [ -b $dev ]
-    then
-      echo "... found"
-      if [ ! -b $partition ]
-      then
-        echo "Partitioning $dev"
-        parted ${dev} --script -- mklabel data1
-        parted ${dev} --script -- mkpart primary 0 -1
-      else
-        echo "Partition ${partition} already exists"
-      fi
-
-      echo "Formatting partition $partition"
-      mkfs.ext3 $partition
-
-      echo "Labeling partition $partition as $label"
-      e2label $partition $label
-
-      echo "Mounting partition $partition to $mountpoint"
-      [ ! -d $mountpoint ] && mkdir $mountpoint
-
-      if [ $(grep -c $mountpoint /etc/mtab) -eq 0 ]
-      then
-        mount LABEL=$label -o noatime $mountpoint
-      fi
-
-      if [ $(grep -c $mountpoint /etc/mtab) -ne 0 ]
-      then
-        echo "$partition is mounted on $mountpoint"
-      else
-        echo "$partition is not mounted"
-      fi
-
-      if [ $(grep -c $mountpoint /etc/fstab) -eq 0 ]
-      then
-        echo "Adding $partition to /etc/fstab"
-        grep $mountpoint /etc/mtab >> /etc/fstab
-      fi
-    else
-      echo "... not found"
-    fi
-
-    let i=${i}+1
+[ -d /disk1 -a ! -d /applogs ] && ln -s /disk1 /applogs
+for a in 1 2 3 4 5 6 7 8 9
+do 
+  rm -rvf /disk${a}/*
 done
 
