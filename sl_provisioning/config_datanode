@@ -39,11 +39,11 @@ roles:
 
 EOM
 
-curl http://10.101.56.66/grains.deku >> /etc/salt/grains
+curl http://10.106.140.216/grains.deku >> /etc/salt/grains
 
 cat << EOM > /etc/salt/minion
 # startup-provisioned
-master: 10.101.56.66
+master: 10.106.140.216
 
 mine_functions:
   network.interfaces: []
