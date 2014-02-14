@@ -37,42 +37,43 @@ echo -n "Looking for $dev "
 
 if [ -b $dev ]
 then
-    echo "... found"
-    if [ ! -b $partition ]
-    then
-      echo "Partitioning $dev"
-      parted /dev/sd${n} --script -- mklabel data1
-      parted /dev/sd${n} --script -- mkpart primary 0 -1
-      echo "Formatting $partition"
-      mkfs.ext3 $partition
-    else
-      echo "Partition ${partition} already exists"
-    fi
-    e2label $partition $label
-    [ ! -d $mountpoint ] && mkdir $mountpoint
+  echo "... found"
+  if [ ! -b $partition ]
+  then
+    echo "Partitioning $dev"
+    parted /dev/sd${n} --script -- mklabel data1
+    parted /dev/sd${n} --script -- mkpart primary 0 -1
+  else
+    echo "Partition ${partition} already exists"
+  fi
 
-    if [ $(grep -c $mountpoint /etc/mtab) -eq 0 ]
-    then
-      mount LABEL=$label -o noatime $mountpoint
-    fi
+  echo "Formatting partition $partition"
+  mkfs.ext3 $partition
 
-    if [ $(grep -c $mountpoint /etc/mtab) -ne 0 ]
-    then
-      echo "$partition is mounted on $mountpoint"
-    else
-      echo "$partition is not mounted"
-    fi
+  echo "Labeling partition $partition as $label"
+  e2label $partition $label
 
-    if [ $(grep -c $mountpoint /etc/fstab) -eq 0 ]
-    then
-      echo "Adding $partition to /etc/fstab"
-      grep $mountpoint /etc/mtab >> /etc/fstab
-    fi
+  echo "Mounting partition $partition to $mountpoint"
+  [ ! -d $mountpoint ] && mkdir $mountpoint
 
-    ddir="${mountpoint}/data"
-      [ -d $ddir ] && rm -rvf $ddir
-    done
+  if [ $(grep -c $mountpoint /etc/mtab) -eq 0 ]
+  then
+    mount LABEL=$label -o noatime $mountpoint
+  fi
+
+  if [ $(grep -c $mountpoint /etc/mtab) -ne 0 ]
+  then
+    echo "$partition is mounted on $mountpoint"
+  else
+    echo "$partition is not mounted"
+  fi
+
+  if [ $(grep -c $mountpoint /etc/fstab) -eq 0 ]
+  then
+    echo "Adding $partition to /etc/fstab"
+    grep $mountpoint /etc/mtab >> /etc/fstab
+  fi
 else
-    echo "... not found"
+  echo "... not found"
 fi
 
