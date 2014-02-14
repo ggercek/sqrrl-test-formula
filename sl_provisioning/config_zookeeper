@@ -29,18 +29,14 @@ EOM
 service salt-minion restart
 chkconfig salt-minion on
 
-i=1
+dev="/dev/sdb"
+partition="${dev}1"
+label="zookeeper"
+mountpoint="/var/lib/${label}"
+echo -n "Looking for $dev "
 
-for n in b c d e f g h i j k l m
-do
-  dev="/dev/sd${n}"
-  partition="${dev}1"
-  label="data${i}"
-  mountpoint="/${label}"
-  echo -n "Looking for $dev "
-
-  if [ -b $dev ]
-  then
+if [ -b $dev ]
+then
     echo "... found"
     if [ ! -b $partition ]
     then
@@ -48,7 +44,7 @@ do
       parted /dev/sd${n} --script -- mklabel data1
       parted /dev/sd${n} --script -- mkpart primary 0 -1
       echo "Formatting $partition"
-      mkfs.ext2 $partition
+      mkfs.ext3 $partition
     else
       echo "Partition ${partition} already exists"
     fi
@@ -73,18 +69,10 @@ do
       grep $mountpoint /etc/mtab >> /etc/fstab
     fi
 
-    # erase pre-existing data
-    for d in hdfs yarn mapred
-    do
-      ddir="${mountpoint}/${d}"
+    ddir="${mountpoint}/data"
       [ -d $ddir ] && rm -rvf $ddir
     done
-    
-  else
+else
     echo "... not found"
-  fi
-
-let i=${i}+1
-
-done
+fi
 
