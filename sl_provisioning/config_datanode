@@ -50,7 +50,7 @@ mine_functions:
   test.ping: []
   grains.items: []
   network.ip_addrs:
-    - bond0
+    - eth4
 
 mine_interval: 2
 
